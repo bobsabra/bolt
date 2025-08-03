@@ -1,0 +1,10 @@
+[build]
+  command = "pnpm run build"
+  publish = "build/client"
+
+[build.environment]
+  NODE_VERSION = "20"
+  NODE_OPTIONS = "--max_old_space_size=4096"
+
+[functions]
+  node_bundler = "esbuild"
