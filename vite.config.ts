@@ -5,27 +5,34 @@ import UnoCSS from "unocss/vite";
 import { netlifyPlugin } from "@netlify/remix-adapter/plugin";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
-// Vite config
 export default defineConfig({
   plugins: [
     remix(),
     tsconfigPaths(),
-    UnoCSS(),                 // for virtual:uno.css
-   nodePolyfills({ protocolImports: true }),
+    UnoCSS(),
+    nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
   ],
-  resolve: {
-    alias: {
-      path: "path-browserify", // ✅ fixes `istextorbinary` using `path`
-      buffer: "buffer",
+
+  // ✅ Allow top-level await by targeting modern JS
+  build: {
+    target: "esnext",
+    modulePreload: { polyfill: true },
+  },
+
+  // ✅ Make sure pre-bundling also understands TLA
+  optimizeDeps: {
+    include: ["buffer", "process", "path-browserify", "istextorbinary"],
+    esbuildOptions: {
+      target: "esnext",
+      supported: { "top-level-await": true },
     },
   },
-  optimizeDeps: {
-    include: [
-      "buffer",
-      "process",
-      "path-browserify",
-      "istextorbinary",
-    ],
+
+  resolve: {
+    alias: {
+      path: "path-browserify",
+      buffer: "buffer",
+    },
   },
 });
