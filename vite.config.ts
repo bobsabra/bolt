@@ -3,7 +3,7 @@ import { vitePlugin as remix } from "@remix-run/dev";
 import tsconfigPaths from "vite-tsconfig-paths";
 import UnoCSS from "unocss/vite";
 import { netlifyPlugin } from "@netlify/remix-adapter/plugin";
-import nodePolyfills from "vite-plugin-node-polyfills";
+import { nodePolyfills } from "vite-plugin-node-polyfills";
 
 // Vite config
 export default defineConfig({
@@ -11,9 +11,7 @@ export default defineConfig({
     remix(),
     tsconfigPaths(),
     UnoCSS(),                 // for virtual:uno.css
-    nodePolyfills({           // ✅ polyfill Buffer, process, etc. in browser
-      protocolImports: true,
-    }),
+   nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
   ],
   resolve: {
