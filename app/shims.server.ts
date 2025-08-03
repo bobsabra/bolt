@@ -1,7 +1,9 @@
-// app/shims.server.ts
-import { Buffer as NodeBuffer } from 'node:buffer';
+// app/shims/server.ts
+// Make Node globals available to the server bundle (Netlify Functions).
 
-// Ensure global Buffer exists in the Netlify/Node runtime (safe if it already exists)
-if (!(globalThis as any).Buffer) {
-  (globalThis as any).Buffer = NodeBuffer;
-}
+import { Buffer } from "node:buffer";
+import { Readable } from "node:stream";
+
+// Only set them if they aren't already present.
+if (!(globalThis as any).Buffer) (globalThis as any).Buffer = Buffer;
+if (!(globalThis as any).Readable) (globalThis as any).Readable = Readable;
