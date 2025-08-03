@@ -5,6 +5,15 @@ import { nodePolyfills } from 'vite-plugin-node-polyfills';
 import { optimizeCssModules } from 'vite-plugin-optimize-css-modules';
 import tsconfigPaths from 'vite-tsconfig-paths';
 import * as dotenv from 'dotenv';
+import { netlifyPlugin } from "@netlify/remix-adapter/plugin";
+
+export default defineConfig({
+  plugins: [
+    remix(),
+    tsconfigPaths(),
+    netlifyPlugin(),
+  ],
+});
 
 dotenv.config();
 
