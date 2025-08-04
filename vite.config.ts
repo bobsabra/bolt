@@ -11,7 +11,7 @@ export default defineConfig(({ ssrBuild }) => ({
     remix(),
     tsconfigPaths(),
     UnoCSS(),
-    // ❌ Do NOT run polyfills on SSR – they rewrite node:stream/web
+    // ✅ Only polyfill the browser build
     !ssrBuild && nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
   ].filter(Boolean),
@@ -22,19 +22,27 @@ export default defineConfig(({ ssrBuild }) => ({
   },
 
   optimizeDeps: ssrBuild
-    ? {} // no client deps/polyfills during SSR pre-bundle
+    ? {} // no polyfill pre-bundling for SSR
     : {
         include: ["buffer", "process", "path-browserify", "istextorbinary"],
         esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
       },
 
   resolve: {
-    // ❌ No browser aliases for SSR
     alias: ssrBuild
-      ? {}
+      ? {
+          // 👇 Force Node built-ins during SSR
+          "stream": "node:stream",
+          "stream/web": "node:stream/web",
+          "stream-browserify": "node:stream",
+          "stream-browserify/web": "node:stream/web",
+        }
       : {
           path: "path-browserify",
           buffer: "buffer",
         },
   },
+
+  // (optional, but helps SSR resolution prefer Node)
+  ssr: { target: "node" },
 }));
