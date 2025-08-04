@@ -1,3 +1,6 @@
+// Force polyfills to load before anything else
+import { Buffer } from 'buffer';
+globalThis.Buffer = Buffer;
 import "./polyfills.server";
 import type { AppLoadContext } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
