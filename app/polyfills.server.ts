@@ -1,15 +1,23 @@
-// Force Buffer to be available immediately 
+// Import buffer polyfill
 import { Buffer } from 'buffer';
 
-// Set Buffer globally BEFORE anything else can run
-globalThis.Buffer = Buffer;
-
-// Also ensure isBuffer method is available
-if (!globalThis.Buffer.isBuffer) {
-  globalThis.Buffer.isBuffer = Buffer.isBuffer;
+// Force Buffer to be available globally
+if (typeof globalThis.Buffer === 'undefined') {
+  globalThis.Buffer = Buffer;
 }
 
-// Make sure it's also available on the global object
-if (typeof global !== 'undefined') {
+if (typeof global !== 'undefined' && typeof global.Buffer === 'undefined') {
   global.Buffer = Buffer;
+}
+
+// Ensure process is available
+if (typeof globalThis.process === 'undefined') {
+  globalThis.process = { env: {} } as any;
+}
+
+// Additional safety check
+if (!Buffer.isBuffer) {
+  Buffer.isBuffer = function(obj: any): obj is Buffer {
+    return obj != null && obj._isBuffer === true;
+  };
 }
