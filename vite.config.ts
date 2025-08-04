@@ -10,26 +10,51 @@ export default defineConfig(() => ({
     remix(),
     tsconfigPaths(),
     UnoCSS(),
-    nodePolyfills({ protocolImports: true }),
+    nodePolyfills({ 
+      protocolImports: true,
+      // Explicitly exclude stream-browserify
+      exclude: ["stream-browserify", "stream"]
+    }),
     netlifyPlugin(),
+    // Custom plugin to prevent stream-browserify resolution
+    {
+      name: 'prevent-stream-browserify',
+      resolveId(id) {
+        if (id === 'stream-browserify' || id === 'stream-browserify/web') {
+          return 'node:stream';
+        }
+        if (id === 'stream/web') {
+          return 'node:stream/web';
+        }
+        return null;
+      }
+    }
   ],
 
   build: {
     target: "esnext",
     modulePreload: { polyfill: true },
+    rollupOptions: {
+      external: ["stream-browserify"],
+    },
   },
 
   optimizeDeps: {
     include: ["buffer", "process", "path-browserify", "istextorbinary"],
     esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
+    exclude: ["stream-browserify", "stream-browserify/web"]
   },
 
   resolve: {
     alias: {
-      "stream/web": "node:stream/web",
-      stream: "node:stream",
-      path: "path-browserify",
-      buffer: "buffer",
+      // Force all stream imports to use Node.js built-ins
+      "stream": "node:stream",
+      "stream/web": "node:stream/web", 
+      "stream-browserify": "node:stream",
+      "stream-browserify/web": "node:stream/web",
+      // Browser polyfills
+      "path": "path-browserify",
+      "buffer": "buffer",
     },
   },
 
@@ -37,6 +62,15 @@ export default defineConfig(() => ({
     target: "node",
     resolve: {
       conditions: ["node"],
+      alias: {
+        "stream": "node:stream",
+        "stream/web": "node:stream/web",
+        "stream-browserify": "node:stream",
+        "stream-browserify/web": "node:stream/web",
+        "path": "path-browserify", 
+        "buffer": "buffer",
+      },
     },
+    external: ["stream-browserify"],
   },
 }));
