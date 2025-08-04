@@ -1,4 +1,3 @@
-// vite.config.ts
 import { defineConfig } from "vite";
 import { vitePlugin as remix } from "@remix-run/dev";
 import tsconfigPaths from "vite-tsconfig-paths";
@@ -11,7 +10,7 @@ export default defineConfig(({ ssrBuild }) => ({
     remix(),
     tsconfigPaths(),
     UnoCSS(),
-    // ✅ Only polyfill the browser build
+    // Only polyfill the browser build
     !ssrBuild && nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
   ].filter(Boolean),
@@ -22,19 +21,16 @@ export default defineConfig(({ ssrBuild }) => ({
   },
 
   optimizeDeps: ssrBuild
-    ? {} // no polyfill pre-bundling for SSR
+    ? {}
     : {
         include: ["buffer", "process", "path-browserify", "istextorbinary"],
-        esbuildOptions: {
-          target: "esnext",
-          supported: { "top-level-await": true },
-        },
+        esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
       },
 
   resolve: {
     alias: ssrBuild
       ? {
-          // 👇 Force Node built-ins during SSR
+          // Force Node built-ins during SSR
           stream: "node:stream",
           "stream/web": "node:stream/web",
           "stream-browserify": "node:stream",
@@ -46,6 +42,5 @@ export default defineConfig(({ ssrBuild }) => ({
         },
   },
 
-  // (optional, but helps SSR resolution prefer Node)
   ssr: { target: "node" },
 }));
