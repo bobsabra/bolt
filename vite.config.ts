@@ -5,42 +5,45 @@ import UnoCSS from "unocss/vite";
 import { netlifyPlugin } from "@netlify/remix-adapter/plugin";
 import { nodePolyfills } from "vite-plugin-node-polyfills";
 
-export default defineConfig(({ ssrBuild }) => ({
+export default defineConfig(() => ({
   plugins: [
     remix(),
     tsconfigPaths(),
     UnoCSS(),
-    // Only polyfill the browser build
-    !ssrBuild && nodePolyfills({ protocolImports: true }),
+    // Safe to include; we’ll pin SSR resolution to Node so it won’t leak into SSR.
+    nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
-  ].filter(Boolean),
+  ],
 
   build: {
     target: "esnext",
     modulePreload: { polyfill: true },
   },
 
-  optimizeDeps: ssrBuild
-    ? {}
-    : {
-        include: ["buffer", "process", "path-browserify", "istextorbinary"],
-        esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
-      },
-
-  resolve: {
-    alias: ssrBuild
-      ? {
-          // Force Node built-ins during SSR
-          stream: "node:stream",
-          "stream/web": "node:stream/web",
-          "stream-browserify": "node:stream",
-          "stream-browserify/web": "node:stream/web",
-        }
-      : {
-          path: "path-browserify",
-          buffer: "buffer",
-        },
+  optimizeDeps: {
+    include: ["buffer", "process", "path-browserify", "istextorbinary"],
+    esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
   },
 
-  ssr: { target: "node" },
+  resolve: {
+    alias: {
+      // Always force Node built-ins if anything imports these paths.
+      "stream/web": "node:stream/web",
+      stream: "node:stream",
+      "stream-browserify": "node:stream",
+      "stream-browserify/web": "node:stream/web",
+
+      // Browser shims for actual browser code
+      path: "path-browserify",
+      buffer: "buffer",
+    },
+  },
+
+  ssr: {
+    target: "node",
+    resolve: {
+      // Prefer node conditions when resolving exports
+      conditions: ["node"],
+    },
+  },
 }));
