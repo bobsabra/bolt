@@ -25,14 +25,17 @@ export default defineConfig(({ ssrBuild }) => ({
     ? {} // no polyfill pre-bundling for SSR
     : {
         include: ["buffer", "process", "path-browserify", "istextorbinary"],
-        esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
+        esbuildOptions: {
+          target: "esnext",
+          supported: { "top-level-await": true },
+        },
       },
 
   resolve: {
     alias: ssrBuild
       ? {
           // 👇 Force Node built-ins during SSR
-          "stream": "node:stream",
+          stream: "node:stream",
           "stream/web": "node:stream/web",
           "stream-browserify": "node:stream",
           "stream-browserify/web": "node:stream/web",
