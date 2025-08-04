@@ -1,5 +1,5 @@
-// Fixed shims for server-side rendering
-// Use Node.js built-in streams directly
-export const ReadableStream = globalThis.ReadableStream || (await import("node:stream/web")).ReadableStream;
-export const WritableStream = globalThis.WritableStream || (await import("node:stream/web")).WritableStream;
-export const TransformStream = globalThis.TransformStream || (await import("node:stream/web")).TransformStream;
+// Server-side shims for Web Streams
+// Import directly from Node.js built-ins to avoid any aliasing issues
+import { ReadableStream as NodeReadableStream, WritableStream as NodeWritableStream, TransformStream as NodeTransformStream } from "node:stream/web";
+
+export { NodeReadableStream as ReadableStream, NodeWritableStream as WritableStream, NodeTransformStream as TransformStream };
