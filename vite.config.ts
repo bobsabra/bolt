@@ -18,10 +18,13 @@ export default defineConfig(() => ({
   build: {
     target: "esnext",
     modulePreload: { polyfill: true },
+    rollupOptions: {
+      external: ["stream-browserify"],
+    },
   },
 
   optimizeDeps: {
-    // Remove "stream-browserify" from here since we're aliasing it to Node streams
+    // Remove stream-browserify from include since we're aliasing it
     include: ["buffer", "process", "path-browserify", "istextorbinary"],
     esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
   },
@@ -45,11 +48,17 @@ export default defineConfig(() => ({
     resolve: {
       // Prefer node conditions when resolving exports
       conditions: ["node"],
-      // Ensure Node built-ins are used in SSR
+      // Apply the same aliases for SSR
       alias: {
+        "stream/web": "node:stream/web",
+        stream: "node:stream",
         "stream-browserify": "node:stream",
         "stream-browserify/web": "node:stream/web",
+        path: "path-browserify",
+        buffer: "buffer",
       },
     },
+    // Externalize stream-browserify in SSR
+    external: ["stream-browserify"],
   },
 }));
