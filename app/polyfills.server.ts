@@ -1,16 +1,15 @@
-// Runtime polyfills for serverless environment
+// Force Buffer to be available immediately 
 import { Buffer } from 'buffer';
-import process from 'process';
 
-// Ensure Buffer is available globally
-if (typeof globalThis.Buffer === 'undefined') {
-  globalThis.Buffer = Buffer;
+// Set Buffer globally BEFORE anything else can run
+globalThis.Buffer = Buffer;
+
+// Also ensure isBuffer method is available
+if (!globalThis.Buffer.isBuffer) {
+  globalThis.Buffer.isBuffer = Buffer.isBuffer;
 }
 
-// Ensure process is available globally  
-if (typeof globalThis.process === 'undefined') {
-  globalThis.process = process;
+// Make sure it's also available on the global object
+if (typeof global !== 'undefined') {
+  global.Buffer = Buffer;
 }
-
-// Export for explicit imports
-export { Buffer, process };
