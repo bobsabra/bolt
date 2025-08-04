@@ -1,9 +1,8 @@
-// app/shims/server.ts
-// Make Node globals available to the server bundle (Netlify Functions).
+// Use Node's native Web Streams for SSR (Remix's shims.server.ts)
+import {
+  ReadableStream,
+  WritableStream,
+  TransformStream,
+} from "node:stream/web";
 
-import { Buffer } from "node:buffer";
-import { Readable } from "node:stream";
-
-// Only set them if they aren't already present.
-if (!(globalThis as any).Buffer) (globalThis as any).Buffer = Buffer;
-if (!(globalThis as any).Readable) (globalThis as any).Readable = Readable;
+export { ReadableStream, WritableStream, TransformStream };
