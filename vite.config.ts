@@ -10,7 +10,6 @@ export default defineConfig(() => ({
     remix(),
     tsconfigPaths(),
     UnoCSS(),
-    // Safe to include; we'll pin SSR resolution to Node so it won't leak into SSR.
     nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
   ],
@@ -18,26 +17,17 @@ export default defineConfig(() => ({
   build: {
     target: "esnext",
     modulePreload: { polyfill: true },
-    rollupOptions: {
-      external: ["stream-browserify"],
-    },
   },
 
   optimizeDeps: {
-    // Remove stream-browserify from include since we're aliasing it
     include: ["buffer", "process", "path-browserify", "istextorbinary"],
     esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
   },
 
   resolve: {
     alias: {
-      // Always force Node built-ins if anything imports these paths.
       "stream/web": "node:stream/web",
       stream: "node:stream",
-      "stream-browserify": "node:stream",
-      "stream-browserify/web": "node:stream/web",
-
-      // Browser shims for actual browser code
       path: "path-browserify",
       buffer: "buffer",
     },
@@ -46,19 +36,7 @@ export default defineConfig(() => ({
   ssr: {
     target: "node",
     resolve: {
-      // Prefer node conditions when resolving exports
       conditions: ["node"],
-      // Apply the same aliases for SSR
-      alias: {
-        "stream/web": "node:stream/web",
-        stream: "node:stream",
-        "stream-browserify": "node:stream",
-        "stream-browserify/web": "node:stream/web",
-        path: "path-browserify",
-        buffer: "buffer",
-      },
     },
-    // Externalize stream-browserify in SSR
-    external: ["stream-browserify"],
   },
 }));
