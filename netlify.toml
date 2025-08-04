@@ -5,6 +5,14 @@
 [build.environment]
   NODE_VERSION = "20"
   NODE_OPTIONS = "--max_old_space_size=4096"
+  NPM_FLAGS = "--legacy-peer-deps"
 
 [functions]
   node_bundler = "esbuild"
+  external_node_modules = ["buffer"]
+
+[[headers]]
+  for = "/*"
+  [headers.values]
+    X-Frame-Options = "DENY"
+    X-Content-Type-Options = "nosniff"
