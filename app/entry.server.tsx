@@ -1,3 +1,4 @@
+import "./polyfills.server";
 import type { AppLoadContext } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
 import { PassThrough } from "node:stream";
