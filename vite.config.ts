@@ -10,7 +10,7 @@ export default defineConfig(() => ({
     remix(),
     tsconfigPaths(),
     UnoCSS(),
-    // Safe to include; we’ll pin SSR resolution to Node so it won’t leak into SSR.
+    // Safe to include; we'll pin SSR resolution to Node so it won't leak into SSR.
     nodePolyfills({ protocolImports: true }),
     netlifyPlugin(),
   ],
@@ -21,6 +21,7 @@ export default defineConfig(() => ({
   },
 
   optimizeDeps: {
+    // Remove "stream-browserify" from here since we're aliasing it to Node streams
     include: ["buffer", "process", "path-browserify", "istextorbinary"],
     esbuildOptions: { target: "esnext", supported: { "top-level-await": true } },
   },
@@ -44,6 +45,11 @@ export default defineConfig(() => ({
     resolve: {
       // Prefer node conditions when resolving exports
       conditions: ["node"],
+      // Ensure Node built-ins are used in SSR
+      alias: {
+        "stream-browserify": "node:stream",
+        "stream-browserify/web": "node:stream/web",
+      },
     },
   },
 }));
