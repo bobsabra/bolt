@@ -1,51 +1,21 @@
-// Force polyfills to load before anything else
-import { Buffer } from 'buffer';
-globalThis.Buffer = Buffer;
-import "./polyfills.server";
-import type { AppLoadContext } from "@remix-run/node";
+import type { EntryContext } from "@remix-run/node";
 import { RemixServer } from "@remix-run/react";
-import { PassThrough } from "node:stream";
-import { renderToPipeableStream } from "react-dom/server";
-
-const ABORT_DELAY = 5_000;
+import { renderToString } from "react-dom/server";
 
 export default function handleRequest(
   request: Request,
   responseStatusCode: number,
   responseHeaders: Headers,
-  remixContext: any,
-  _loadContext: AppLoadContext
+  remixContext: EntryContext
 ) {
-  return new Promise<Response>((resolve, reject) => {
-    let didError = false;
+  const html = renderToString(
+    <RemixServer context={remixContext} url={request.url} />
+  );
 
-    const { pipe, abort } = renderToPipeableStream(
-      <RemixServer context={remixContext} url={request.url} />,
-      {
-        onShellReady() {
-          const body = new PassThrough();
-          const headers = new Headers(responseHeaders);
-          headers.set("Content-Type", "text/html");
+  responseHeaders.set("Content-Type", "text/html");
 
-          resolve(
-            new Response(body as unknown as ReadableStream, {
-              status: didError ? 500 : responseStatusCode,
-              headers,
-            })
-          );
-
-          pipe(body);
-        },
-        onShellError(err) {
-          reject(err);
-        },
-        onError(err) {
-          didError = true;
-          console.error(err);
-        },
-      }
-    );
-
-    setTimeout(abort, ABORT_DELAY);
+  return new Response("<!DOCTYPE html>" + html, {
+    status: responseStatusCode,
+    headers: responseHeaders,
   });
 }
