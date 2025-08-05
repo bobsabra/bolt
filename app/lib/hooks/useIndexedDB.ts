@@ -9,6 +9,12 @@ export function useIndexedDB() {
   const [error, setError] = useState<Error | null>(null);
 
   useEffect(() => {
+    // Check if we're in the browser
+    if (typeof window === 'undefined' || !('indexedDB' in window)) {
+      setIsLoading(false);
+      return;
+    }
+
     const initDB = async () => {
       try {
         setIsLoading(true);
